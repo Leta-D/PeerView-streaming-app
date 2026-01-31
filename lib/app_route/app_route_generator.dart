@@ -3,7 +3,7 @@ import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/constants/app_colors.dart';
 import 'package:peer_view/ui/role_selection_page.dart';
 
-class RoutesGenerator {
+class AppRoutesGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments as Map<String, dynamic>?;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:peer_view/logic/selected_role/selected_role_cubit.dart';
+import 'package:peer_view/app_route/app_routes.dart';
+import 'package:peer_view/logic/role_based_page_control/role__based_page_controller_cubit.dart';
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key});
@@ -14,7 +15,7 @@ class RoleSelectionPage extends StatelessWidget {
           children: [
             InkWell(
               onTap: () {
-                context.read<SelectedRoleCubit>().selectHost();
+                context.read<RoleBasedPageController>().selectHost();
               },
               child: Container(
                 decoration: BoxDecoration(color: Colors.red),
@@ -23,14 +24,26 @@ class RoleSelectionPage extends StatelessWidget {
             ),
             InkWell(
               onTap: () {
-                context.read<SelectedRoleCubit>().selectClient();
+                context.read<RoleBasedPageController>().selectClient();
               },
               child: Container(
                 decoration: BoxDecoration(color: Colors.red),
                 child: Text("Client"),
               ),
             ),
-            ElevatedButton(onPressed: () {}, child: Text("Next")),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.roleSelection,
+                  arguments: {
+                    "animation": AppRouteAnimationType.fade,
+                    "duration": 500,
+                  },
+                );
+              },
+              child: Text("Next"),
+            ),
           ],
         ),
       ),
