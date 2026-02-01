@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/constants/app_colors.dart';
 import 'package:peer_view/ui/client/client_main_page.dart';
+import 'package:peer_view/ui/client/qr_scanner.dart';
 import 'package:peer_view/ui/host/host_main_page.dart';
+import 'package:peer_view/ui/host/qr_generator.dart';
 import 'package:peer_view/ui/role_selection_page.dart';
 
 class AppRoutesGenerator {
@@ -26,7 +28,7 @@ class AppRoutesGenerator {
 
       case AppRoutes.qrGenerator:
         return _animatedRoute(
-          HostMainPage(),
+          QrGenerator(),
           args?["animation"],
           args?["duration"],
         );
@@ -39,7 +41,7 @@ class AppRoutesGenerator {
         );
       case AppRoutes.qrScanner:
         return _animatedRoute(
-          ClientMainPage(),
+          QrScanner(),
           args?["animation"],
           args?["duration"],
         );

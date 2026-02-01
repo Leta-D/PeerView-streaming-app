@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:peer_view/app_route/app_routes.dart';
 
 class HostMainPage extends StatefulWidget {
   const HostMainPage({super.key});
@@ -16,7 +17,12 @@ class _HostMainPageState extends State<HostMainPage> {
           title: Text("Host"),
           expandedHeight: 150,
           actions: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.qr_code_2_rounded)),
+            IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.qrGenerator);
+              },
+              icon: Icon(Icons.qr_code_2_rounded),
+            ),
           ],
         ),
         SliverToBoxAdapter(child: SizedBox(height: 30)),
