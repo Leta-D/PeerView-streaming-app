@@ -16,16 +16,37 @@ class _ClientMainPageState extends State<ClientMainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.bgDark(1),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: AppColors.red(1),
-            title: Text("Client"),
-            expandedHeight: 170,
+            backgroundColor: AppColors.bgDark(1),
+            foregroundColor: AppColors.red(0.6),
+            pinned: true,
+            expandedHeight: 140,
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text(
+                'CLIENT',
+                style: TextStyle(
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white38,
+                ),
+              ),
+            ),
             actions: [
               IconButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.qrScanner);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.qrScanner,
+                    arguments: {
+                      "animation": AppRouteAnimationType.fade,
+                      "duration": 600,
+                    },
+                  ).then((value) {
+                    context.read<ConnectionHandlerCubit>().checkConnection();
+                  });
                 },
                 icon: Icon(Icons.webhook_outlined),
               ),
@@ -43,9 +64,76 @@ class _ClientMainPageState extends State<ClientMainPage> {
                 } else if (state is ConnectionHandlerLoadedState) {
                   return state.isConected
                       ? Column(children: [Text("connected")])
-                      : Column(children: [Text("Not connected")]);
+                      : Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.cardDark(1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.red(0.4)),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'NOT CONNECTIONED To HOST',
+                                  style: TextStyle(
+                                    color: AppColors.red(1),
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                SizedBox(height: 27),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.red(1),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.qrScanner,
+                                        arguments: {
+                                          "animation":
+                                              AppRouteAnimationType.fade,
+                                          "duration": 600,
+                                        },
+                                      ).then((value) {
+                                        context
+                                            .read<ConnectionHandlerCubit>()
+                                            .checkConnection();
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.qr_code_scanner_outlined,
+                                      color: Colors.white,
+                                      size: 23,
+                                    ),
+                                    label: const Text(
+                                      'SCAN QR',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 25),
+                              ],
+                            ),
+                          ),
+                        );
                 }
-                return ElevatedButton(onPressed: () {}, child: Text("Scan"));
+                return Text("Some Error");
               },
             ),
           ),

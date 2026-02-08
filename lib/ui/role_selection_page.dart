@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:peer_view/app_route/app_routes.dart';
+import 'package:peer_view/constants/app_colors.dart';
 import 'package:peer_view/logic/role_based_page_control/role__based_page_controller_cubit.dart';
 import 'package:peer_view/logic/role_based_page_control/selected_role_state.dart';
 
@@ -37,8 +38,8 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                       ),
                       decoration: BoxDecoration(
                         color: state.role == UserRole.host
-                            ? Colors.red.shade200
-                            : Colors.red,
+                            ? AppColors.neonColor(0.5)
+                            : AppColors.neonColor(1),
                       ),
                       child: Text("Host"),
                     ),
@@ -57,8 +58,8 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                       ),
                       decoration: BoxDecoration(
                         color: state.role == UserRole.client
-                            ? Colors.blue.shade200
-                            : Colors.blue,
+                            ? AppColors.red(0.5)
+                            : AppColors.red(1),
                       ),
                       child: Text("Client"),
                     ),
