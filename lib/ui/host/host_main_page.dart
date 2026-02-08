@@ -11,25 +11,27 @@ class HostMainPage extends StatefulWidget {
 class _HostMainPageState extends State<HostMainPage> {
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          title: Text("Host"),
-          expandedHeight: 150,
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.qrGenerator);
-              },
-              icon: Icon(Icons.qr_code_2_rounded),
-            ),
-          ],
-        ),
-        SliverToBoxAdapter(child: SizedBox(height: 30)),
-        SliverToBoxAdapter(
-          child: ElevatedButton(onPressed: () {}, child: Text("Stream")),
-        ),
-      ],
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: Text("Host"),
+            expandedHeight: 150,
+            actions: [
+              IconButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.qrGenerator);
+                },
+                icon: Icon(Icons.qr_code_2_rounded),
+              ),
+            ],
+          ),
+          SliverToBoxAdapter(child: SizedBox(height: 30)),
+          SliverToBoxAdapter(
+            child: ElevatedButton(onPressed: () {}, child: Text("Stream")),
+          ),
+        ],
+      ),
     );
   }
 }

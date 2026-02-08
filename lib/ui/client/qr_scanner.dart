@@ -21,9 +21,9 @@ class _QrScannerState extends State<QrScanner> {
         builder: (context, state) {
           if (state is PermissionHandlerInitialState) {
             context.read<PermissionHandlerCubit>().requestCammeraPermission();
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           } else if (state is PermissionHandlerLoadingState) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           } else if (state is PermissionHandlerGrantedState) {
             return MobileScanner(
               onDetect: (barcode) {
@@ -36,26 +36,34 @@ class _QrScannerState extends State<QrScanner> {
             );
           } else if (state is PermissionHandlerDeniedState ||
               state is PermissionHandlerPermanentlyDeniedState) {
-            return Column(
-              children: [
-                Text(
-                  state is PermissionHandlerDeniedState
-                      ? "cammera permmision is required to scan"
-                      : "cammera permmision is Permanently denied",
-                ),
-                ElevatedButton(
-                  onPressed: () {
+            return Center(
+              child: Column(
+                children: [
+                  Text(
                     state is PermissionHandlerDeniedState
-                        ? context
-                              .read<PermissionHandlerCubit>()
-                              .requestCammeraPermission()
-                        : AppSettings.openAppSettings(
-                            type: AppSettingsType.camera,
-                          );
-                  },
-                  child: Text("Ask again"),
-                ),
-              ],
+                        ? "camera permmision is required to scan"
+                        : "camera permmision is Permanently denied",
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      state is PermissionHandlerDeniedState
+                          ? context
+                                .read<PermissionHandlerCubit>()
+                                .requestCammeraPermission()
+                          : AppSettings.openAppSettings().then((value) {
+                              context
+                                  .read<PermissionHandlerCubit>()
+                                  .requestCammeraPermission();
+                            });
+                    },
+                    child: Text(
+                      state is PermissionHandlerDeniedState
+                          ? "Ask again"
+                          : "Open setting",
+                    ),
+                  ),
+                ],
+              ),
             );
           } else {
             return Text("Some error");

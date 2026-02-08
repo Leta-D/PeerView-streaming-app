@@ -8,7 +8,12 @@ class PermissionHandlerCubit extends Cubit<PermissionHandlerState> {
   Future<void> requestCammeraPermission() async {
     emit(PermissionHandlerLoadingState());
     try {
-      final status = await Permission.camera.request();
+      var status = await Permission.camera.status;
+      if (status.isGranted) {
+        emit(PermissionHandlerGrantedState());
+      } else {
+        status = await Permission.camera.request();
+      }
 
       if (status.isGranted) {
         emit(PermissionHandlerGrantedState());
