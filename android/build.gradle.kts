@@ -2,8 +2,12 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            setUrl("https://maven.webrtc.org")
+        }
     }
 }
+
 
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
