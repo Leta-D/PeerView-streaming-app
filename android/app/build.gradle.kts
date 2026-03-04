@@ -33,10 +33,6 @@ android {
     }
 }
 
-dependencies {
-    implementation("org.webrtc:google-webrtc:1.0.+'")
-
-}
 
 flutter {
     source = "../.."

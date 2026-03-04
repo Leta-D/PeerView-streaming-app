@@ -5,6 +5,8 @@ import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/logic/connection_handler/connection_handler_cubit.dart';
 import 'package:peer_view/logic/permission_handler/permission_handler_cubit.dart';
 import 'package:peer_view/logic/role_based_page_control/role__based_page_controller_cubit.dart';
+import 'package:peer_view/logic/screen_share/screen_share_bloc.dart';
+import 'package:peer_view/test_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,6 +22,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => RoleBasedPageController()),
         BlocProvider(create: (_) => PermissionHandlerCubit()),
         BlocProvider(create: (_) => ConnectionHandlerCubit()),
+        BlocProvider(create: (_) => ScreenShareBloc()),
+        BlocProvider(create: (_) => ScreenBloc()),
       ],
       child: MaterialApp(
         title: 'Peer View',

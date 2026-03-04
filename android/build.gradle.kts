@@ -2,9 +2,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            setUrl("https://maven.webrtc.org")
-        }
+        
     }
 }
 

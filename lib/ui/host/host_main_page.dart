@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/constants/app_colors.dart';
+import 'package:peer_view/logic/screen_share/screen_share_bloc.dart';
+import 'package:peer_view/logic/screen_share/screen_share_event.dart';
+import 'package:peer_view/logic/screen_share/screen_share_state.dart';
+import 'package:peer_view/test_screen.dart';
 
 class HostMainPage extends StatefulWidget {
   const HostMainPage({super.key});
@@ -71,33 +76,108 @@ class _HostMainPageState extends State<HostMainPage> {
                       ),
                     ),
                     SizedBox(height: 27),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.neonColor(1),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+
+                    BlocBuilder<ScreenShareBloc, ScreenShareState>(
+                      builder: (context, state) {
+                        if (state is ScreenShareLoading) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        if (state is ScreenShareStreaming) {
+                          return Center(child: Text('Streaming started'));
+                        }
+                        if (state is ScreenShareError) {
+                          print(state.message);
+                          return Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Error: ${state.message}',
+                                  style: TextStyle(color: AppColors.red(1)),
+                                ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.neonColor(1),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      context.read<ScreenShareBloc>().add(
+                                        StartScreenShare(),
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.stream_rounded,
+                                      color: Colors.black,
+                                      size: 23,
+                                    ),
+                                    label: const Text(
+                                      'Retry',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return Center(
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.neonColor(1),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              onPressed: () {
+                                context.read<ScreenShareBloc>().add(
+                                  StartScreenShare(),
+                                );
+                              },
+                              icon: Icon(
+                                Icons.stream_rounded,
+                                color: Colors.black,
+                                size: 23,
+                              ),
+                              label: const Text(
+                                'STREAM',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.stream_rounded,
-                          color: Colors.black,
-                          size: 23,
-                        ),
-                        label: const Text(
-                          'STREAM',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     SizedBox(height: 25),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => LocalScreenPreview(),
+                          ),
+                        );
+                      },
+                      child: const Text("Preview Local Stream"),
+                    ),
                   ],
                 ),
               ),
