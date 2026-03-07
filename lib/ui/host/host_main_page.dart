@@ -181,7 +181,7 @@ class _HostMainPageState extends State<HostMainPage> {
                                 size: 23,
                               ),
                               label: const Text(
-                                'Record',
+                                'RECORD',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold,
