@@ -1,22 +1,21 @@
-enum ScreenRecordStatus {
-  idle,
-  requestingPermission,
-  recording,
-  stopped,
-  error,
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+
+abstract class ScreenRecordState {}
+
+class InitialScreenRecordState extends ScreenRecordState {}
+
+class LoadingScreenRecordState extends ScreenRecordState {}
+
+class RecordingScreenRecordState extends ScreenRecordState {
+  MediaStream screenMedia;
+
+  RecordingScreenRecordState({required this.screenMedia});
 }
 
-class ScreenRecordState {
-  final ScreenRecordStatus status;
-  final String? message;
+class StoppedScreenRecordState extends ScreenRecordState {}
 
-  const ScreenRecordState({required this.status, this.message});
+class ErrorScreenRecordState extends ScreenRecordState {
+  String errorMessage;
 
-  factory ScreenRecordState.initial() {
-    return const ScreenRecordState(status: ScreenRecordStatus.idle);
-  }
-
-  ScreenRecordState copyWith({ScreenRecordStatus? status, String? message}) {
-    return ScreenRecordState(status: status ?? this.status, message: message);
-  }
+  ErrorScreenRecordState({required this.errorMessage});
 }

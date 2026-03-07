@@ -18,8 +18,8 @@ class ScreenShareBloc extends Bloc<ScreenShareEvent, ScreenShareState> {
   ) async {
     emit(ScreenShareLoading());
     try {
-      final pc = await service.start();
-      emit(ScreenShareStreaming(pc));
+      // final pc = await service.startStream();
+      // emit(ScreenShareStreaming(pc));
     } catch (e) {
       emit(ScreenShareError(e.toString()));
     }
@@ -29,7 +29,7 @@ class ScreenShareBloc extends Bloc<ScreenShareEvent, ScreenShareState> {
     StopScreenShare event,
     Emitter<ScreenShareState> emit,
   ) async {
-    await service.stop();
+    await service.stopStream();
     emit(ScreenShareInitial());
   }
 }

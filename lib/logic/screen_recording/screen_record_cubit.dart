@@ -1,23 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_service.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_state.dart';
 
 class ScreenRecordCubit extends Cubit<ScreenRecordState> {
-  final ScreenRecordService _service;
+  ScreenRecordCubit() : super(InitialScreenRecordState());
 
-  ScreenRecordCubit(this._service) : super(ScreenRecordState.initial());
+  final ScreenRecordService _service = ScreenRecordService();
 
   Future<void> startRecording() async {
     try {
-      emit(state.copyWith(status: ScreenRecordStatus.requestingPermission));
+      emit(LoadingScreenRecordState());
 
-      await _service.start();
+      MediaStream mediaStream = await _service.captureScreen();
 
-      emit(state.copyWith(status: ScreenRecordStatus.recording));
+      emit(RecordingScreenRecordState(screenMedia: mediaStream));
     } catch (e) {
-      emit(
-        state.copyWith(status: ScreenRecordStatus.error, message: e.toString()),
-      );
+      emit(ErrorScreenRecordState(errorMessage: e.toString()));
     }
   }
 
@@ -25,11 +24,9 @@ class ScreenRecordCubit extends Cubit<ScreenRecordState> {
     try {
       await _service.stop();
 
-      emit(state.copyWith(status: ScreenRecordStatus.stopped));
+      emit(StoppedScreenRecordState());
     } catch (e) {
-      emit(
-        state.copyWith(status: ScreenRecordStatus.error, message: e.toString()),
-      );
+      emit(ErrorScreenRecordState(errorMessage: e.toString()));
     }
   }
 }

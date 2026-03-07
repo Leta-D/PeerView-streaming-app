@@ -4,6 +4,10 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// dependencies {
+//     implementation("org.webrtc:google-webrtc")
+// }
+
 android {
     namespace = "com.example.peer_view"
     compileSdk = flutter.compileSdkVersion

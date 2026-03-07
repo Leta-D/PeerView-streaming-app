@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/constants/app_colors.dart';
-import 'package:peer_view/logic/screen_share/screen_share_bloc.dart';
-import 'package:peer_view/logic/screen_share/screen_share_event.dart';
-import 'package:peer_view/logic/screen_share/screen_share_state.dart';
+import 'package:peer_view/logic/screen_recording/screen_record_cubit.dart';
+import 'package:peer_view/logic/screen_recording/screen_record_service.dart';
+import 'package:peer_view/logic/screen_recording/screen_record_state.dart';
+import 'package:peer_view/logic/stream_logic/screen_share_bloc.dart';
+import 'package:peer_view/logic/stream_logic/screen_share_event.dart';
+import 'package:peer_view/logic/stream_logic/screen_share_state.dart';
 import 'package:peer_view/test_screen.dart';
 
 class HostMainPage extends StatefulWidget {
@@ -77,21 +81,44 @@ class _HostMainPageState extends State<HostMainPage> {
                     ),
                     SizedBox(height: 27),
 
-                    BlocBuilder<ScreenShareBloc, ScreenShareState>(
+                    BlocBuilder<ScreenRecordCubit, ScreenRecordState>(
                       builder: (context, state) {
-                        if (state is ScreenShareLoading) {
+                        if (state is LoadingScreenRecordState) {
                           return Center(child: CircularProgressIndicator());
                         }
-                        if (state is ScreenShareStreaming) {
-                          return Center(child: Text('Streaming started'));
+                        if (state is RecordingScreenRecordState) {
+                          ScreenRecordService _service = ScreenRecordService();
+                          return Center(
+                            child: Column(
+                              children: [
+                                Text('Recording Screen started'),
+                                SizedBox(
+                                  width: 150,
+                                  height: 200,
+                                  child: FutureBuilder(
+                                    future: _service.showScreen(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return RTCVideoView(snapshot.data!);
+                                      } else if (snapshot.hasError) {
+                                        return Text('Error');
+                                      } else {
+                                        return CircularProgressIndicator();
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         }
-                        if (state is ScreenShareError) {
-                          print(state.message);
+                        if (state is ErrorScreenRecordState) {
+                          print(state.errorMessage);
                           return Center(
                             child: Column(
                               children: [
                                 Text(
-                                  'Error: ${state.message}',
+                                  'Error: ${state.errorMessage}',
                                   style: TextStyle(color: AppColors.red(1)),
                                 ),
                                 SizedBox(
@@ -144,9 +171,9 @@ class _HostMainPageState extends State<HostMainPage> {
                                 ),
                               ),
                               onPressed: () {
-                                context.read<ScreenShareBloc>().add(
-                                  StartScreenShare(),
-                                );
+                                context
+                                    .read<ScreenRecordCubit>()
+                                    .startRecording();
                               },
                               icon: Icon(
                                 Icons.stream_rounded,
@@ -154,7 +181,7 @@ class _HostMainPageState extends State<HostMainPage> {
                                 size: 23,
                               ),
                               label: const Text(
-                                'STREAM',
+                                'Record',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold,
@@ -167,17 +194,17 @@ class _HostMainPageState extends State<HostMainPage> {
                       },
                     ),
                     SizedBox(height: 25),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => LocalScreenPreview(),
-                          ),
-                        );
-                      },
-                      child: const Text("Preview Local Stream"),
-                    ),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (_) => LocalScreenPreview(),
+                    //       ),
+                    //     );
+                    //   },
+                    //   child: const Text("Preview Local Stream"),
+                    // ),
                   ],
                 ),
               ),
