@@ -3,8 +3,11 @@
 
 
     <uses-permission android:name="android.permission.CAMERA"/>
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
 
     
@@ -13,11 +16,16 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <service
+        <!-- <service
             android:name=".ScreenRecordService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" 
-        />
+        /> -->
+
+        <service
+    android:name="com.example.peer_view.ScreenCaptureService"
+    android:foregroundServiceType="mediaProjection"
+    android:exported="false"/>
 
         <activity
             android:name=".MainActivity"

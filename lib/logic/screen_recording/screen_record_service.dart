@@ -14,19 +14,26 @@ class ScreenRecordService {
     }
   }
 
+  Future<void> stopForegroundService() async {
+    try {
+      await platform.invokeMethod('stopForegroundService');
+    } catch (e) {
+      print("Error stoping foreground service: $e");
+    }
+  }
+
   Future<MediaStream> captureScreen() async {
     final Map<String, dynamic> mediaConstraints = {
       'audio': false,
-      'video': true,
-      // 'video': {
-      //   'mandatory': {
-      //     'minWidth': '1280',
-      //     'minHeight': '720',
-      //     'minFrameRate': '30',
-      //   },
-      //   'facingMode': 'user',
-      //   'optional': [],
-      // },
+      'video': {
+        'mandatory': {
+          'minWidth': '1280',
+          'minHeight': '720',
+          'minFrameRate': '30',
+        },
+        'facingMode': 'user',
+        'optional': [],
+      },
     };
     try {
       await startForegroundService();
@@ -40,16 +47,20 @@ class ScreenRecordService {
     return _screenStream!;
   }
 
-  Future<RTCVideoRenderer> showScreen() async {
+  static Future<RTCVideoRenderer> showScreen(MediaStream screenStream) async {
     RTCVideoRenderer localPreview = RTCVideoRenderer();
 
     await localPreview.initialize();
 
-    localPreview.srcObject = await captureScreen();
+    localPreview.srcObject = screenStream;
     return localPreview;
   }
 
   Future<void> stop() async {
+    await stopForegroundService();
+    for (var track in _screenStream!.getTracks()) {
+      track.stop();
+    }
     await _screenStream?.dispose();
   }
 }

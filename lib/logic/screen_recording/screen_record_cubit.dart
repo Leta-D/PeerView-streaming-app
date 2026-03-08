@@ -12,9 +12,10 @@ class ScreenRecordCubit extends Cubit<ScreenRecordState> {
     try {
       emit(LoadingScreenRecordState());
 
-      MediaStream mediaStream = await _service.captureScreen();
-
-      emit(RecordingScreenRecordState(screenMedia: mediaStream));
+      if (state is! RecordingScreenRecordState) {
+        MediaStream mediaStream = await _service.captureScreen();
+        emit(RecordingScreenRecordState(screenMedia: mediaStream));
+      }
     } catch (e) {
       emit(ErrorScreenRecordState(errorMessage: e.toString()));
     }

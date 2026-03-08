@@ -17,7 +17,11 @@ class MainActivity: FlutterActivity() {
                 val intent = Intent(this, ScreenCaptureService::class.java)
                 startForegroundService(intent)
                 result.success(null)
-            } else {
+            } else if (call.method == "stopForegroundService") {
+                val intent = Intent(this, ScreenCaptureService::class.java)
+                stopService(intent)
+                result.success(null)
+            }else {
                 result.notImplemented()
             }
         }
