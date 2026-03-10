@@ -11,7 +11,11 @@ class ConnectionHandlerCubit extends Cubit<ConnectionHandlerState> {
       final connectivityResult = await Connectivity().checkConnectivity();
       emit(
         ConnectionHandlerLoadedState(
-          isConected: connectivityResult.contains(ConnectivityResult.wifi),
+          isConected:
+              connectivityResult.contains(ConnectivityResult.wifi) ||
+              connectivityResult.contains(
+                ConnectivityResult.wifi,
+              ), // change this one to bluetooth
         ),
       );
     } catch (e) {
