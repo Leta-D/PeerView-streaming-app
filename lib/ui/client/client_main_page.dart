@@ -4,6 +4,8 @@ import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/constants/app_colors.dart';
 import 'package:peer_view/logic/connection_handler/connection_handler_cubit.dart';
 import 'package:peer_view/logic/connection_handler/connection_handler_state.dart';
+import 'package:peer_view/logic/offer_logic/client/host_discovery_cubit.dart';
+import 'package:peer_view/logic/offer_logic/client/host_discovery_state.dart';
 
 class ClientMainPage extends StatefulWidget {
   const ClientMainPage({super.key});
@@ -135,6 +137,68 @@ class _ClientMainPageState extends State<ClientMainPage> {
                 }
                 return Text("Some Error");
               },
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                BlocBuilder<HostDiscoveryCubit, HostDiscoveryState>(
+                  builder: (context, state) {
+                    if (state is HostDiscoveredState) {
+                      return Column(
+                        children: [
+                          Text(
+                            "Available Hosts ",
+                            style: TextStyle(color: AppColors.neonColor(1)),
+                          ),
+                          SizedBox(
+                            height: 100,
+                            child: state.hosts.isEmpty
+                                ? Text(
+                                    "No Host Found ${state.hosts.length}",
+                                    style: TextStyle(color: AppColors.red(1)),
+                                  )
+                                : ListView(
+                                    children: List.generate(
+                                      state.hosts.length,
+                                      (index) => ListTile(
+                                        title: Text(
+                                          "Name ${state.hosts[index].name}",
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      );
+                    }
+                    if (state is HostDiscoveringState) {
+                      return Text(
+                        "Host Searching ...",
+                        style: TextStyle(color: AppColors.neonColor(1)),
+                      );
+                    }
+                    if (state is HostDiscoveryErrorState) {
+                      return Text(
+                        "Error on Host Discovery ${state.errorMessage}",
+                        style: TextStyle(color: AppColors.neonColor(1)),
+                      );
+                    }
+
+                    return Text(
+                      "Tap to find all Availlable hosts",
+                      style: TextStyle(color: AppColors.neonColor(1)),
+                    );
+                  },
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<HostDiscoveryCubit>().startListening();
+                  },
+                  child: Text("Search"),
+                ),
+              ],
             ),
           ),
         ],

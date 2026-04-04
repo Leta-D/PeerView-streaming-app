@@ -18,15 +18,22 @@ class HostDiscoveryCubit extends Cubit<HostDiscoveryState> {
 
   Future<void> startListening() async {
     try {
-      _socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
+      _socket = await RawDatagramSocket.bind(
+        InternetAddress.anyIPv4,
+        port,
+        reuseAddress: true,
+      );
 
       emit(HostDiscoveringState());
 
       _socket!.listen((event) {
+        print(event);
         if (event == RawSocketEvent.read) {
           final datagram = _socket!.receive();
 
-          if (datagram == null) return;
+          if (datagram == null) {
+            return;
+          }
 
           final message = utf8.decode(datagram.data);
           final data = jsonDecode(message);
@@ -41,15 +48,14 @@ class HostDiscoveryCubit extends Cubit<HostDiscoveryState> {
             );
 
             _hosts[ip] = host;
-
-            emit(HostDiscoveredState(hosts: _hosts.values.toList()));
           }
         }
+        emit(HostDiscoveredState(hosts: _hosts.values.toList()));
       });
 
       // cleanup dead hosts
       _cleanUpTimer = Timer.periodic(
-        const Duration(seconds: 5),
+        const Duration(seconds: 30),
         (_) => removeDeadHosts(),
       );
     } catch (e) {

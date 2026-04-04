@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:peer_view/app_route/app_route_generator.dart';
 import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/logic/connection_handler/connection_handler_cubit.dart';
+import 'package:peer_view/logic/offer_logic/client/host_discovery_cubit.dart';
+import 'package:peer_view/logic/offer_logic/hosts/broadcast_cubit.dart';
 import 'package:peer_view/logic/permission_handler/permission_handler_cubit.dart';
 import 'package:peer_view/logic/role_based_page_control/role__based_page_controller_cubit.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_cubit.dart';
@@ -25,6 +27,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => ConnectionHandlerCubit()),
         BlocProvider(create: (_) => ScreenShareBloc()),
         BlocProvider(create: (_) => ScreenRecordCubit()),
+        BlocProvider(create: (_) => HostDiscoveryCubit()),
+        BlocProvider(create: (_) => BroadcastCubit()),
       ],
       child: MaterialApp(
         title: 'Peer View',

@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/constants/app_colors.dart';
+import 'package:peer_view/logic/offer_logic/hosts/broadcast_cubit.dart';
+import 'package:peer_view/logic/offer_logic/hosts/broadcast_state.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_cubit.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_service.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_state.dart';
@@ -108,8 +110,8 @@ class _HostMainPageState extends State<HostMainPage> {
                                   ),
                                   onPressed: () {
                                     context
-                                        .read<ScreenRecordCubit>()
-                                        .startRecording();
+                                        .read<BroadcastCubit>()
+                                        .startBroadcast();
                                   },
                                   icon: Icon(
                                     Icons.stream_rounded,
@@ -117,7 +119,7 @@ class _HostMainPageState extends State<HostMainPage> {
                                     size: 23,
                                   ),
                                   label: const Text(
-                                    'RECORD',
+                                    'Broadcast',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.bold,
@@ -128,6 +130,53 @@ class _HostMainPageState extends State<HostMainPage> {
                               ),
                             ),
                             SizedBox(height: 25),
+
+                            BlocBuilder<BroadcastCubit, BroadcastState>(
+                              builder: (context, state) {
+                                if (state is BroadcastingErrorState) {
+                                  return Text(
+                                    "Error occured on broadcasting \n ${state.errorMessage}",
+                                    style: TextStyle(
+                                      color: AppColors.neonColor(1),
+                                    ),
+                                  );
+                                }
+                                if (state is BroadcastingState) {
+                                  return Column(
+                                    children: [
+                                      Text(
+                                        "Broadcasting ...",
+                                        style: TextStyle(
+                                          color: AppColors.neonColor(1),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          context
+                                              .read<BroadcastCubit>()
+                                              .stopBroadcast();
+                                        },
+                                        child: Text("Stop"),
+                                      ),
+                                    ],
+                                  );
+                                }
+                                if (state is BroadcastingStoppedState) {
+                                  return Text(
+                                    "Broadcasting Stopped",
+                                    style: TextStyle(
+                                      color: AppColors.neonColor(1),
+                                    ),
+                                  );
+                                }
+                                return Text(
+                                  "Tap to start broadcasting",
+                                  style: TextStyle(
+                                    color: AppColors.neonColor(1),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ).animate(
