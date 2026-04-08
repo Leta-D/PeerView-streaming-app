@@ -37,10 +37,14 @@ class ScreenRecordService {
     };
     try {
       await startForegroundService();
-      _screenStream = await navigator.mediaDevices.getDisplayMedia(
-        mediaConstraints,
-      );
+      print("=========================1==============================");
+      _screenStream = await navigator.mediaDevices.getDisplayMedia({
+        "video": true,
+      });
+      print("=========================2==============================");
     } on PlatformException catch (e) {
+      print("=========================3==============================");
+      print("PlatformException: ${e.message}");
       throw Exception('Error capturing screen: ${e.message}');
     }
 

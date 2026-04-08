@@ -1,5 +1,7 @@
 package com.example.peer_view
 
+import android.content.pm.ServiceInfo
+
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
@@ -41,7 +43,23 @@ class ScreenCaptureService : Service() {
             .setSmallIcon(R.mipmap.ic_launcher)
             .build()
 
-        startForeground(1, notification)
+        // startForeground(1, notification)
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            startForeground(
+                1,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+        )
+        } else {
+            startForeground(1, notification)
+        }
+
+        // startForeground(
+        //     1,
+        //     notification,
+        //     ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+        // )
 
         return START_STICKY
     }
