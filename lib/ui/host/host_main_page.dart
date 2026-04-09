@@ -6,6 +6,8 @@ import 'package:peer_view/app_route/app_routes.dart';
 import 'package:peer_view/constants/app_colors.dart';
 import 'package:peer_view/logic/offer_logic/hosts/broadcast_cubit.dart';
 import 'package:peer_view/logic/offer_logic/hosts/broadcast_state.dart';
+import 'package:peer_view/logic/offer_logic/hosts/hh/host_stream_bloc.dart';
+import 'package:peer_view/logic/offer_logic/hosts/hh/host_stream_event.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_cubit.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_service.dart';
 import 'package:peer_view/logic/screen_recording/screen_record_state.dart';
@@ -106,6 +108,35 @@ class _HostMainPageState extends State<HostMainPage> {
                             ),
                             SizedBox(height: 27),
 
+                            BlocConsumer<BroadcastCubit, BroadcastState>(
+                              listener: (context, state) {
+                                if (state is BroadcastingState) {
+                                  context.read<HostBloc>().add(
+                                    StartHostStreamEvent(),
+                                  );
+                                }
+                              },
+                              builder: (context, state) {
+                                if (state is BroadcastingInitialState) {
+                                  return Row(
+                                    spacing: 20,
+                                    children: [
+                                      CircularProgressIndicator(
+                                        strokeWidth: 1.3,
+                                      ),
+                                      Text(
+                                        "Initiating broadcast...",
+                                        style: TextStyle(
+                                          color: AppColors.neonColor(1),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+                                return SizedBox.shrink();
+                              },
+                            ),
+
                             Center(
                               child: SizedBox(
                                 width: double.infinity,
@@ -140,54 +171,55 @@ class _HostMainPageState extends State<HostMainPage> {
                                 ),
                               ),
                             ),
+
                             SizedBox(height: 25),
 
-                            // BlocBuilder<BroadcastCubit, BroadcastState>(
-                            //   builder: (context, state) {
-                            //     if (state is BroadcastingErrorState) {
-                            //       return Text(
-                            //         "Error occured on broadcasting \n ${state.errorMessage}",
-                            //         style: TextStyle(
-                            //           color: AppColors.neonColor(1),
-                            //         ),
-                            //       );
-                            //     }
-                            //     if (state is BroadcastingState) {
-                            //       return Column(
-                            //         children: [
-                            //           Text(
-                            //             "Broadcasting ...",
-                            //             style: TextStyle(
-                            //               color: AppColors.neonColor(1),
-                            //             ),
-                            //           ),
-                            //           ElevatedButton(
-                            //             onPressed: () {
-                            //               context
-                            //                   .read<BroadcastCubit>()
-                            //                   .stopBroadcast();
-                            //             },
-                            //             child: Text("Stop"),
-                            //           ),
-                            //         ],
-                            //       );
-                            //     }
-                            //     if (state is BroadcastingStoppedState) {
-                            //       return Text(
-                            //         "Broadcasting Stopped",
-                            //         style: TextStyle(
-                            //           color: AppColors.neonColor(1),
-                            //         ),
-                            //       );
-                            //     }
-                            //     return Text(
-                            //       "Tap to start broadcasting",
-                            //       style: TextStyle(
-                            //         color: AppColors.neonColor(1),
-                            //       ),
-                            //     );
-                            //   },
-                            // ),
+                            BlocBuilder<BroadcastCubit, BroadcastState>(
+                              builder: (context, state) {
+                                if (state is BroadcastingErrorState) {
+                                  return Text(
+                                    "Error occured on broadcasting \n ${state.errorMessage}",
+                                    style: TextStyle(
+                                      color: AppColors.neonColor(1),
+                                    ),
+                                  );
+                                }
+                                if (state is BroadcastingState) {
+                                  return Column(
+                                    children: [
+                                      Text(
+                                        "Broadcasting ...",
+                                        style: TextStyle(
+                                          color: AppColors.neonColor(1),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          context
+                                              .read<BroadcastCubit>()
+                                              .stopBroadcast();
+                                        },
+                                        child: Text("Stop"),
+                                      ),
+                                    ],
+                                  );
+                                }
+                                if (state is BroadcastingStoppedState) {
+                                  return Text(
+                                    "Broadcasting Stopped",
+                                    style: TextStyle(
+                                      color: AppColors.neonColor(1),
+                                    ),
+                                  );
+                                }
+                                return Text(
+                                  "Tap to start broadcasting",
+                                  style: TextStyle(
+                                    color: AppColors.neonColor(1),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ).animate(
@@ -203,6 +235,8 @@ class _HostMainPageState extends State<HostMainPage> {
           BlocConsumer<ScreenRecordCubit, ScreenRecordState>(
             listener: (context, state) {
               if (state is RecordingScreenRecordState) {
+                context.read<BroadcastCubit>().startBroadcast();
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text("Show Preview"),
@@ -316,19 +350,24 @@ class _HostMainPageState extends State<HostMainPage> {
                     : Positioned(
                         right: 20,
                         bottom: 20,
-                        child: FloatingActionButton(
-                          onPressed: () {
-                            setState(() {
-                              _showPreview = true;
-                            });
-                          },
-                          backgroundColor: AppColors.cardDark(0.7),
-                          tooltip: "Show Preview",
-                          child: Icon(
-                            Icons.preview_rounded,
-                            color: AppColors.neonColor(1),
-                          ),
+                        child: Container(
+                          color: AppColors.red(1),
+                          width: 20,
+                          height: 21,
                         ),
+                        // child: FloatingActionButton(
+                        //   onPressed: () {
+                        //     setState(() {
+                        //       _showPreview = true;
+                        //     });
+                        //   },
+                        //   backgroundColor: AppColors.cardDark(0.7),
+                        //   tooltip: "Show Preview",
+                        //   child: Icon(
+                        //     Icons.preview_rounded,
+                        //     color: AppColors.neonColor(1),
+                        //   ),
+                        // ),
                       );
               }
               if (state is ErrorScreenRecordState) {

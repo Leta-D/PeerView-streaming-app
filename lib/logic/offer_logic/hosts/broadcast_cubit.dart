@@ -31,21 +31,6 @@ class BroadcastCubit extends Cubit<BroadcastState> {
     }
   }
 
-  // void _sendBroadcast() {
-  //   print("Broadcasting");
-  //   final message = jsonEncode({
-  //     "type": "SCREEN_HOST",
-  //     "name": "Leta phone",
-  //     "port": 8888,
-  //   });
-
-  //   _socket!.send(
-  //     utf8.encode(message),
-  //     InternetAddress("192.168.146.255"),
-  //     port,
-  //   );
-  // }
-
   void _sendBroadcast() async {
     print("Broadcasting");
 

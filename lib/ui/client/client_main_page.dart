@@ -166,6 +166,10 @@ class _ClientMainPageState extends State<ClientMainPage> {
                                         title: Text(
                                           "Name ${state.hosts[index].name}",
                                         ),
+                                        iconColor: AppColors.neonColor(1),
+                                        leading: Icon(
+                                          Icons.h_mobiledata_rounded,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -197,6 +201,12 @@ class _ClientMainPageState extends State<ClientMainPage> {
                     context.read<HostDiscoveryCubit>().startListening();
                   },
                   child: Text("Search"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<HostDiscoveryCubit>().stopListening();
+                  },
+                  child: Text("Stop"),
                 ),
               ],
             ),
