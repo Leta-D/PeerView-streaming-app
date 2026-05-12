@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:peer_view_2/core/settings/stream_settings_store.dart';
 import 'package:peer_view_2/features/screen_streaming/cubit/screen_streaming_cubit.dart';
 import 'package:peer_view_2/features/screen_streaming/repositories/screen_streaming_repository.dart';
 import 'package:peer_view_2/features/screen_streaming/repositories/screen_streaming_repository_impl.dart';
@@ -21,14 +22,18 @@ import 'package:peer_view_2/features/screen_viewer/services/impl/jpeg_frame_deco
 import 'package:peer_view_2/features/screen_viewer/services/impl/lan_subnet_host_discovery_service.dart';
 import 'package:peer_view_2/features/screen_viewer/services/impl/reconnecting_websocket_client_service.dart';
 import 'package:peer_view_2/features/screen_viewer/services/websocket_client_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final GetIt sl = GetIt.instance;
 
 /// Registers host and viewer dependencies.
-void configureDependencies() {
+Future<void> configureDependencies() async {
   if (sl.isRegistered<ScreenStreamingRepository>()) {
     return;
   }
+
+  final prefs = await SharedPreferences.getInstance();
+  sl.registerSingleton<StreamSettingsStore>(StreamSettingsStore(prefs));
 
   _registerHostDependencies();
   _registerViewerDependencies();
@@ -55,6 +60,7 @@ void _registerHostDependencies() {
     () => ScreenStreamingCubit(
       repository: sl<ScreenStreamingRepository>(),
       logger: sl<StreamLogger>(),
+      settingsStore: sl<StreamSettingsStore>(),
     ),
   );
 }
@@ -73,6 +79,9 @@ void _registerViewerDependencies() {
   );
 
   sl.registerFactory(
-    () => ViewerCubit(repository: sl<ViewerRepository>()),
+    () => ViewerCubit(
+      repository: sl<ViewerRepository>(),
+      settingsStore: sl<StreamSettingsStore>(),
+    ),
   );
 }
