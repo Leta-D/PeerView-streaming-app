@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:peer_view_2/core/settings/stream_settings_store.dart';
 import 'package:peer_view_2/features/screen_streaming/cubit/screen_streaming_state.dart';
 import 'package:peer_view_2/features/screen_streaming/models/stream_event.dart';
 import 'package:peer_view_2/features/screen_streaming/models/stream_log_entry.dart';
@@ -14,9 +15,11 @@ class ScreenStreamingCubit extends Cubit<ScreenStreamingState> {
   ScreenStreamingCubit({
     required ScreenStreamingRepository repository,
     required StreamLogger logger,
-    this.serverConfig = const StreamServerConfig(),
+    required StreamSettingsStore settingsStore,
+    StreamServerConfig? serverConfig,
   })  : _repository = repository,
         _logger = logger,
+        serverConfig = serverConfig ?? settingsStore.config,
         super(const ScreenStreamingState()) {
     _eventSubscription = _repository.eventStream.listen(_handleStreamEvent);
     _logSubscription = _logger.logStream.listen(_handleLogEntry);
@@ -161,12 +164,7 @@ class ScreenStreamingCubit extends Cubit<ScreenStreamingState> {
           ),
         );
       case StreamServerStoppedEvent():
-        emit(
-          state.copyWith(
-            serverRunning: false,
-            connectedClientCount: 0,
-          ),
-        );
+        emit(state.copyWith(serverRunning: false, connectedClientCount: 0));
       case StreamClientConnectedEvent():
         emit(
           state.copyWith(
