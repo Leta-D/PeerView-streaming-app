@@ -44,6 +44,7 @@ class ScreenStreamingRepositoryImpl implements ScreenStreamingRepository {
   HostNetworkInfo? _networkInfo;
   StreamServerConfig _config = const StreamServerConfig();
   bool _streaming = false;
+  bool _processingFrame = false;
 
   @override
   bool get isServerRunning => _webSocketServerService.isRunning;
@@ -66,14 +67,22 @@ class ScreenStreamingRepositoryImpl implements ScreenStreamingRepository {
   @override
   Future<HostNetworkInfo> loadNetworkInfo({StreamServerConfig config = const StreamServerConfig()}) async {
     _config = config;
-    _networkInfo = await _networkService.getHostNetworkInfo(port: config.port);
+    _networkInfo = await _networkService.getHostNetworkInfo(
+      port: config.port,
+      webSocketPath: config.webSocketPath,
+    );
     _listenToNetworkChanges();
     return _networkInfo!;
   }
 
   void _listenToNetworkChanges() {
     _networkSubscription?.cancel();
-    _networkSubscription = _networkService.watchNetworkInfo(port: _config.port).listen(
+    _networkSubscription = _networkService
+        .watchNetworkInfo(
+          port: _config.port,
+          webSocketPath: _config.webSocketPath,
+        )
+        .listen(
       (info) {
         _networkInfo = info;
         _updateServerHostMetadata(info.hostIpAddress);
@@ -102,7 +111,10 @@ class ScreenStreamingRepositoryImpl implements ScreenStreamingRepository {
     }
 
     _config = config;
-    _networkInfo = await _networkService.getHostNetworkInfo(port: config.port);
+    _networkInfo = await _networkService.getHostNetworkInfo(
+      port: config.port,
+      webSocketPath: config.webSocketPath,
+    );
     _listenToNetworkChanges();
     _updateServerHostMetadata(_networkInfo!.hostIpAddress);
 
@@ -132,6 +144,11 @@ class ScreenStreamingRepositoryImpl implements ScreenStreamingRepository {
   }
 
   Future<void> _processFrame(CapturedFrame frame) async {
+    if (!_streaming || _processingFrame) {
+      return;
+    }
+
+    _processingFrame = true;
     final timestamp = DateTime.now();
     _eventController.add(
       StreamFrameCapturedEvent(
@@ -167,6 +184,8 @@ class ScreenStreamingRepositoryImpl implements ScreenStreamingRepository {
           cause: error,
         ),
       );
+    } finally {
+      _processingFrame = false;
     }
   }
 
