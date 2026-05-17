@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:peer_view_2/features/screen_streaming/models/encoded_frame.dart';
 import 'package:peer_view_2/features/screen_streaming/models/stream_event.dart';
@@ -32,6 +33,15 @@ class DartWebSocketServerService implements WebSocketServerService {
   /// Sets host metadata included in the stream-start handshake message.
   void updateHostMetadata({required String hostIpAddress}) {
     _hostIpForHandshake = hostIpAddress;
+  }
+
+  bool _isConfiguredPath(String requestPath) {
+    final configured = _config.webSocketPath;
+    final withoutSlash =
+        configured.startsWith('/') ? configured.substring(1) : configured;
+    return requestPath == configured ||
+        requestPath == withoutSlash ||
+        requestPath == '/$withoutSlash';
   }
 
   @override
@@ -76,13 +86,29 @@ class DartWebSocketServerService implements WebSocketServerService {
 
   Future<void> _handleRequest(HttpRequest request) async {
     if (!WebSocketTransformer.isUpgradeRequest(request)) {
+      // Lightweight identity endpoint used by LAN discovery (HTTP GET).
+      if (request.method == 'GET' && _isConfiguredPath(request.uri.path)) {
+        request.response.statusCode = HttpStatus.ok;
+        request.response.headers.contentType = ContentType.json;
+        request.response.write(
+          jsonEncode({
+            'type': 'peer_view_host',
+            'port': _config.port,
+            'path': _config.webSocketPath,
+            'client': 'peer_view_2_host',
+            'host': _hostIpForHandshake ?? '0.0.0.0',
+          }),
+        );
+        await request.response.close();
+        return;
+      }
+
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();
       return;
     }
 
-    if (request.uri.path != _config.webSocketPath &&
-        request.uri.path != _config.webSocketPath.replaceFirst('/', '')) {
+    if (!_isConfiguredPath(request.uri.path)) {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();
       return;
