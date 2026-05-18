@@ -13,25 +13,31 @@ class DeviceNetworkService implements NetworkService {
   final Connectivity _connectivity;
 
   @override
-  Future<HostNetworkInfo> getHostNetworkInfo({int port = 8080}) async {
+  Future<HostNetworkInfo> getHostNetworkInfo({
+    int port = 8080,
+    String webSocketPath = '/stream',
+  }) async {
     final hostIp = await _resolveLocalIpAddress();
-    return _buildInfo(hostIp, port);
+    return _buildInfo(hostIp, port, webSocketPath);
   }
 
   @override
-  Stream<HostNetworkInfo> watchNetworkInfo({int port = 8080}) async* {
-    yield await getHostNetworkInfo(port: port);
+  Stream<HostNetworkInfo> watchNetworkInfo({
+    int port = 8080,
+    String webSocketPath = '/stream',
+  }) async* {
+    yield await getHostNetworkInfo(port: port, webSocketPath: webSocketPath);
 
     await for (final _ in _connectivity.onConnectivityChanged) {
-      yield await getHostNetworkInfo(port: port);
+      yield await getHostNetworkInfo(port: port, webSocketPath: webSocketPath);
     }
   }
 
-  HostNetworkInfo _buildInfo(String hostIp, int port) {
+  HostNetworkInfo _buildInfo(String hostIp, int port, String webSocketPath) {
     return HostNetworkInfo(
       hostIpAddress: hostIp,
       port: port,
-      websocketUrl: 'ws://$hostIp:$port/stream',
+      websocketUrl: 'ws://$hostIp:$port$webSocketPath',
     );
   }
 
