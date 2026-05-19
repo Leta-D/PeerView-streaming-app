@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -11,7 +12,9 @@ import 'package:permission_handler/permission_handler.dart';
 class WebRtcScreenCaptureService implements ScreenCaptureService {
   WebRtcScreenCaptureService({
     MethodChannel? platformChannel,
-    Duration frameCaptureInterval = const Duration(milliseconds: 100),
+    // flutter_webrtc writes every snapshot to the same temp PNG; keep this slow
+    // enough that captures rarely overlap even before the in-flight guard.
+    Duration frameCaptureInterval = const Duration(milliseconds: 250),
   })  : _platformChannel = platformChannel ?? const MethodChannel('screen_capture'),
         _frameCaptureInterval = frameCaptureInterval;
 
@@ -26,6 +29,7 @@ class WebRtcScreenCaptureService implements ScreenCaptureService {
   Timer? _frameCaptureTimer;
   int _sequenceNumber = 0;
   bool _isCapturing = false;
+  bool _frameCaptureInFlight = false;
 
   @override
   Stream<CapturedFrame> get frameStream => _frameController.stream;
@@ -150,13 +154,18 @@ class WebRtcScreenCaptureService implements ScreenCaptureService {
 
   Future<void> _captureAndEmitFrame() async {
     final track = _videoTrack;
-    if (!_isCapturing || track == null || _frameController.isClosed) {
+    if (!_isCapturing ||
+        _frameCaptureInFlight ||
+        track == null ||
+        _frameController.isClosed) {
       return;
     }
 
+    // captureFrame() always writes `captureFrame.png`; overlapping calls corrupt it.
+    _frameCaptureInFlight = true;
     try {
       final buffer = await track.captureFrame();
-      final data = buffer.asUint8List();
+      final data = _imageBytesFromBuffer(buffer);
       if (data.isEmpty) {
         return;
       }
@@ -169,11 +178,64 @@ class WebRtcScreenCaptureService implements ScreenCaptureService {
           timestamp: DateTime.now(),
           width: _readIntSetting(settings, 'width'),
           height: _readIntSetting(settings, 'height'),
+          mimeType: _guessMimeType(data),
         ),
       );
     } catch (_) {
       // Skip transient capture failures.
+    } finally {
+      _frameCaptureInFlight = false;
     }
+  }
+
+  /// flutter_webrtc returns a ByteBuffer from a temp PNG file; trim to image bytes.
+  Uint8List _imageBytesFromBuffer(ByteBuffer buffer) {
+    final raw = buffer.asUint8List();
+    return _trimToImagePayload(raw);
+  }
+
+  Uint8List _trimToImagePayload(Uint8List raw) {
+    if (raw.length >= 8 &&
+        raw[0] == 0x89 &&
+        raw[1] == 0x50 &&
+        raw[2] == 0x4E &&
+        raw[3] == 0x47) {
+      for (var i = 8; i + 11 < raw.length; i++) {
+        if (raw[i + 4] == 0x49 &&
+            raw[i + 5] == 0x45 &&
+            raw[i + 6] == 0x4E &&
+            raw[i + 7] == 0x44) {
+          return Uint8List.fromList(raw.sublist(0, i + 12));
+        }
+      }
+    }
+
+    if (raw.length >= 2 && raw[0] == 0xFF && raw[1] == 0xD8) {
+      for (var i = raw.length - 2; i >= 2; i--) {
+        if (raw[i] == 0xFF && raw[i + 1] == 0xD9) {
+          return Uint8List.fromList(raw.sublist(0, i + 2));
+        }
+      }
+    }
+
+    return Uint8List.fromList(raw);
+  }
+
+  String _guessMimeType(Uint8List data) {
+    if (data.length >= 3 &&
+        data[0] == 0xFF &&
+        data[1] == 0xD8 &&
+        data[2] == 0xFF) {
+      return 'image/jpeg';
+    }
+    if (data.length >= 4 &&
+        data[0] == 0x89 &&
+        data[1] == 0x50 &&
+        data[2] == 0x4E &&
+        data[3] == 0x47) {
+      return 'image/png';
+    }
+    return 'image/png';
   }
 
   int? _readIntSetting(Map<String, dynamic> settings, String key) {
