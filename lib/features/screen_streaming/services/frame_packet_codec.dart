@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -26,10 +25,10 @@ class FramePacketCodec {
       packet[i] = magic[i];
     }
 
-    view.setUint32(4, frame.sequenceNumber);
-    view.setUint32(8, frame.width ?? 0);
-    view.setUint32(12, frame.height ?? 0);
-    view.setUint64(16, frame.timestamp.millisecondsSinceEpoch);
+    view.setUint32(4, frame.sequenceNumber, Endian.big);
+    view.setUint32(8, frame.width ?? 0, Endian.big);
+    view.setUint32(12, frame.height ?? 0, Endian.big);
+    view.setUint64(16, frame.timestamp.millisecondsSinceEpoch, Endian.big);
     packet.setRange(headerLength, packet.length, frame.data);
 
     return packet;
@@ -49,7 +48,7 @@ class FramePacketCodec {
   static String streamStartMessage({required String host, required int port}) {
     return jsonEncode({
       'type': 'stream_start',
-      'mimeType': 'image/jpeg',
+      'mimeType': 'image/png',
       'host': host,
       'port': port,
       'client': 'peer_view_2_host',
@@ -89,14 +88,14 @@ class FramePacketCodec {
     }
 
     final view = ByteData.view(packet.buffer, packet.offsetInBytes, packet.length);
-    final width = view.getUint32(8);
-    final height = view.getUint32(12);
+    final width = view.getUint32(8, Endian.big);
+    final height = view.getUint32(12, Endian.big);
 
     return (
-      sequenceNumber: view.getUint32(4),
+      sequenceNumber: view.getUint32(4, Endian.big),
       width: width == 0 ? null : width,
       height: height == 0 ? null : height,
-      timestamp: DateTime.fromMillisecondsSinceEpoch(view.getUint64(16)),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(view.getUint64(16, Endian.big)),
     );
   }
 }
