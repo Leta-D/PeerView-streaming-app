@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:peer_view_2/core/settings/stream_settings_store.dart';
+import 'package:peer_view_2/features/screen_streaming/models/stream_server_config.dart';
 import 'package:peer_view_2/features/screen_viewer/cubit/viewer_state.dart';
 import 'package:peer_view_2/features/screen_viewer/models/decoded_frame.dart';
 import 'package:peer_view_2/features/screen_viewer/models/discovered_host.dart';
@@ -10,8 +12,11 @@ import 'package:peer_view_2/features/screen_viewer/repositories/viewer_repositor
 
 /// Coordinates host discovery, connection, and playback for the viewer feature.
 class ViewerCubit extends Cubit<ViewerState> {
-  ViewerCubit({required ViewerRepository repository})
-      : _repository = repository,
+  ViewerCubit({
+    required ViewerRepository repository,
+    required StreamSettingsStore settingsStore,
+  })  : _repository = repository,
+        _settingsStore = settingsStore,
         super(const ViewerState()) {
     _hostsSubscription = _repository.discoveredHostsStream.listen(_handleHostsUpdated);
     _connectionSubscription = _repository.connectionEvents.listen(_handleConnectionEvent);
@@ -19,6 +24,13 @@ class ViewerCubit extends Cubit<ViewerState> {
   }
 
   final ViewerRepository _repository;
+  final StreamSettingsStore _settingsStore;
+
+  StreamServerConfig get _discoveryConfig => _settingsStore.config;
+
+  int get discoveryPort => _discoveryConfig.port;
+
+  String get discoveryPath => _discoveryConfig.webSocketPath;
 
   StreamSubscription<List<DiscoveredHost>>? _hostsSubscription;
   StreamSubscription<ViewerConnectionEvent>? _connectionSubscription;
@@ -43,10 +55,11 @@ class ViewerCubit extends Cubit<ViewerState> {
     );
 
     try {
+      final config = _discoveryConfig;
       if (_repository.isScanning) {
-        await _repository.refreshDiscovery();
+        await _repository.refreshDiscovery(config: config);
       } else {
-        await _repository.startDiscovery();
+        await _repository.startDiscovery(config: config);
       }
     } on HostDiscoveryException catch (error) {
       emit(
@@ -104,6 +117,26 @@ class ViewerCubit extends Cubit<ViewerState> {
         ),
       );
     }
+  }
+
+  /// Connects using a join payload decoded from a scanned QR code.
+  Future<void> connectViaQrPayload({
+    required String websocketUrl,
+    String? deviceName,
+    String? ipAddress,
+    int? port,
+  }) {
+    final uri = Uri.tryParse(websocketUrl);
+    final host = DiscoveredHost(
+      id: '${ipAddress ?? uri?.host ?? 'qr'}:${port ?? uri?.port ?? 8080}',
+      deviceName: deviceName ?? 'Peer View Host',
+      ipAddress: ipAddress ?? uri?.host ?? 'unknown',
+      port: port ?? uri?.port ?? 8080,
+      websocketUrl: websocketUrl,
+      status: HostStatus.streaming,
+      lastSeen: DateTime.now(),
+    );
+    return connectToHost(host);
   }
 
   Future<void> disconnect() async {
