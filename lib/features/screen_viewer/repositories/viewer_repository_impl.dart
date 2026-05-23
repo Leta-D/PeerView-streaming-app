@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:peer_view_2/features/screen_streaming/models/stream_server_config.dart';
 import 'package:peer_view_2/features/screen_viewer/models/decoded_frame.dart';
 import 'package:peer_view_2/features/screen_viewer/models/discovered_host.dart';
 import 'package:peer_view_2/features/screen_viewer/models/viewer_connection_event.dart';
@@ -43,6 +44,7 @@ class ViewerRepositoryImpl implements ViewerRepository {
 
   DiscoveredHost? _connectedHost;
   bool _shouldResumeDiscoveryAfterDisconnect = false;
+  StreamServerConfig _discoveryConfig = const StreamServerConfig();
 
   @override
   Stream<List<DiscoveredHost>> get discoveredHostsStream =>
@@ -61,19 +63,38 @@ class ViewerRepositoryImpl implements ViewerRepository {
   bool get isConnected => _webSocketClientService.isConnected;
 
   @override
-  Future<void> startDiscovery() {
+  Future<void> startDiscovery({
+    StreamServerConfig config = const StreamServerConfig(),
+  }) {
+    _discoveryConfig = config;
     _listenToConnectivityChanges();
-    return _hostDiscoveryService.startDiscovery();
+    return _hostDiscoveryService.startDiscovery(
+      port: config.port,
+      webSocketPath: config.webSocketPath,
+    );
   }
 
   @override
-  Future<void> refreshDiscovery() {
-    return _hostDiscoveryService.refresh();
+  Future<void> refreshDiscovery({
+    StreamServerConfig config = const StreamServerConfig(),
+  }) {
+    _discoveryConfig = config;
+    return _hostDiscoveryService.refresh(
+      port: config.port,
+      webSocketPath: config.webSocketPath,
+    );
   }
 
   @override
   Future<void> stopDiscovery() {
     return _hostDiscoveryService.stopDiscovery();
+  }
+
+  Future<void> _resumeDiscovery() {
+    return _hostDiscoveryService.startDiscovery(
+      port: _discoveryConfig.port,
+      webSocketPath: _discoveryConfig.webSocketPath,
+    );
   }
 
   @override
@@ -92,12 +113,15 @@ class ViewerRepositoryImpl implements ViewerRepository {
     } catch (error) {
       _connectedHost = null;
       if (_shouldResumeDiscoveryAfterDisconnect) {
-        await _hostDiscoveryService.startDiscovery();
+        await _resumeDiscovery();
       }
       if (error is ViewerConnectionException) {
         rethrow;
       }
-      throw ViewerConnectionException('Failed to connect to ${host.websocketUrl}', cause: error);
+      throw ViewerConnectionException(
+        'Failed to connect to ${host.websocketUrl}',
+        cause: error,
+      );
     }
   }
 
@@ -109,7 +133,7 @@ class ViewerRepositoryImpl implements ViewerRepository {
 
     if (_shouldResumeDiscoveryAfterDisconnect) {
       _shouldResumeDiscoveryAfterDisconnect = false;
-      await _hostDiscoveryService.startDiscovery();
+      await _resumeDiscovery();
     }
   }
 
@@ -117,20 +141,15 @@ class ViewerRepositoryImpl implements ViewerRepository {
     try {
       final decoded = _frameDecoderService.decode(packet);
       if (decoded == null) {
-        throw const FrameDecodeException('Invalid or unsupported frame packet.');
+        // Skip non-frame / corrupt packets without tearing down the session.
+        return;
       }
 
       if (!_frameController.isClosed) {
         _frameController.add(decoded);
       }
-    } catch (error) {
-      _forwardConnectionEvent(
-        ViewerConnectionFailedEvent(
-          timestamp: DateTime.now(),
-          message: 'Frame decoding failed',
-          cause: error,
-        ),
-      );
+    } catch (_) {
+      // Keep the WebSocket open; one bad packet should not kill playback.
     }
   }
 
@@ -141,18 +160,24 @@ class ViewerRepositoryImpl implements ViewerRepository {
     _connectionController.add(event);
 
     if (event is ViewerConnectionFailedEvent ||
-        (event is ViewerDisconnectedEvent && event.reason != 'Disconnected by user')) {
+        (event is ViewerDisconnectedEvent &&
+            event.reason != 'Disconnected by user')) {
       _connectedHost = null;
       if (_shouldResumeDiscoveryAfterDisconnect) {
-        unawaited(_hostDiscoveryService.startDiscovery());
+        unawaited(_resumeDiscovery());
       }
     }
   }
 
   void _listenToConnectivityChanges() {
-    _connectivitySubscription ??= _connectivity.onConnectivityChanged.listen((_) async {
-      if (!_webSocketClientService.isConnected && _hostDiscoveryService.isScanning) {
-        await _hostDiscoveryService.refresh();
+    _connectivitySubscription ??=
+        _connectivity.onConnectivityChanged.listen((_) async {
+      if (!_webSocketClientService.isConnected &&
+          _hostDiscoveryService.isScanning) {
+        await _hostDiscoveryService.refresh(
+          port: _discoveryConfig.port,
+          webSocketPath: _discoveryConfig.webSocketPath,
+        );
       }
     });
   }
