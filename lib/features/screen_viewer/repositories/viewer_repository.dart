@@ -1,3 +1,4 @@
+import 'package:peer_view_2/features/screen_streaming/models/stream_server_config.dart';
 import 'package:peer_view_2/features/screen_viewer/models/decoded_frame.dart';
 import 'package:peer_view_2/features/screen_viewer/models/discovered_host.dart';
 import 'package:peer_view_2/features/screen_viewer/models/viewer_connection_event.dart';
@@ -14,9 +15,13 @@ abstract interface class ViewerRepository {
 
   bool get isConnected;
 
-  Future<void> startDiscovery();
+  Future<void> startDiscovery({
+    StreamServerConfig config = const StreamServerConfig(),
+  });
 
-  Future<void> refreshDiscovery();
+  Future<void> refreshDiscovery({
+    StreamServerConfig config = const StreamServerConfig(),
+  });
 
   Future<void> stopDiscovery();
 
