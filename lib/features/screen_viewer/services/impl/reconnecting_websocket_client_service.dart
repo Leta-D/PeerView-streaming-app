@@ -120,15 +120,22 @@ class ReconnectingWebSocketClientService implements WebSocketClientService {
   }
 
   void _handleMessage(dynamic message) {
-    if (message is! List<int>) {
+    List<int>? bytes;
+    if (message is Uint8List) {
+      bytes = message;
+    } else if (message is List<int>) {
+      bytes = message;
+    } else {
       return;
     }
 
-    if (_packetController.isClosed) {
+    if (_packetController.isClosed || bytes.isEmpty) {
       return;
     }
 
-    _packetController.add(Uint8List.fromList(message));
+    _packetController.add(
+      bytes is Uint8List ? bytes : Uint8List.fromList(bytes),
+    );
   }
 
   Future<void> _handleSocketClosed() async {
