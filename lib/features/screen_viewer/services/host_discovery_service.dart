@@ -9,10 +9,16 @@ abstract interface class HostDiscoveryService {
   Stream<List<DiscoveredHost>> get discoveredHostsStream;
 
   /// Starts continuous LAN discovery and periodic refresh.
-  Future<void> startDiscovery({int port = 8080});
+  Future<void> startDiscovery({
+    int port = 8080,
+    String webSocketPath = '/stream',
+  });
 
   /// Performs a one-shot refresh of discovered hosts.
-  Future<void> refresh({int port = 8080});
+  Future<void> refresh({
+    int port = 8080,
+    String webSocketPath = '/stream',
+  });
 
   /// Stops discovery and clears ephemeral scan state.
   Future<void> stopDiscovery();
