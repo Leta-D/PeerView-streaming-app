@@ -97,7 +97,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                 children: [
                   AppEmptyState(
                     icon: Icons.camera_alt_outlined,
-                    title: 'Camera access needed',
+                    title: 'Camera access needed!',
                     message: _errorMessage,
                   ),
                   const SizedBox(height: 16),
