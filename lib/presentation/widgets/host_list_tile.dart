@@ -78,7 +78,7 @@ class HostListTile extends StatelessWidget {
 
   Color _statusColor(HostStatus status) {
     return switch (status) {
-      HostStatus.streaming => AppColors.success,
+      HostStatus.streaming => AppColors.surface,
       HostStatus.available => AppColors.primary,
       HostStatus.unavailable => AppColors.textMuted,
     };
