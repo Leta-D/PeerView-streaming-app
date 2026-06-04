@@ -4,7 +4,7 @@ import 'package:peer_view_2/features/screen_viewer/models/discovered_host.dart';
 import 'package:peer_view_2/presentation/widgets/app_ui.dart';
 import 'package:peer_view_2/presentation/widgets/streaming_animations.dart';
 
-/// List tile for a discovered LAN host with connect action.
+/// List tile for a discovered LAN host with connect action
 class HostListTile extends StatelessWidget {
   const HostListTile({
     super.key,
