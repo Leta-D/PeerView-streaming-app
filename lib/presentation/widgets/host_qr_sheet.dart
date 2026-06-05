@@ -29,7 +29,7 @@ class HostQrSheet extends StatelessWidget {
   }) {
     return showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.success,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -107,11 +107,7 @@ class HostQrSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            AppInfoRow(
-              label: 'URL',
-              value: websocketUrl,
-              selectable: true,
-            ),
+            AppInfoRow(label: 'URL', value: websocketUrl, selectable: true),
             const SizedBox(height: 8),
             AppSecondaryButton(
               label: 'Copy URL',
