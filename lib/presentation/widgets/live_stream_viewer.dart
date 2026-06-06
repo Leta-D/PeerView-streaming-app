@@ -6,7 +6,7 @@ import 'package:peer_view_2/features/screen_viewer/models/decoded_frame.dart';
 import 'package:peer_view_2/presentation/widgets/app_ui.dart';
 import 'package:peer_view_2/presentation/widgets/streaming_animations.dart';
 
-/// Full-screen live stream viewer for decoded JPEG frames.
+/// Full-screen live stream viewer for decoded JPEG frames
 class LiveStreamViewer extends StatelessWidget {
   const LiveStreamViewer({
     super.key,
