@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:peer_view_2/constants/app_colors.dart';
 import 'package:peer_view_2/features/screen_viewer/models/decoded_frame.dart';
+import 'package:peer_view_2/presentation/widgets/app_ui.dart';
+import 'package:peer_view_2/presentation/widgets/streaming_animations.dart';
 
 /// Full-screen live stream viewer for decoded JPEG frames.
 class LiveStreamViewer extends StatelessWidget {
@@ -23,23 +26,50 @@ class LiveStreamViewer extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        ColoredBox(
-          color: Colors.black,
-          child: frame == null
-              ? const Center(
-                  child: CircularProgressIndicator(color: Colors.white70),
-                )
-              : InteractiveViewer(
-                  minScale: 0.5,
-                  maxScale: 4,
-                  child: Center(
-                    child: Image.memory(
-                      frame!.imageBytes,
-                      gaplessPlayback: true,
-                      fit: BoxFit.contain,
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: ColoredBox(
+              color: AppColors.background,
+              child: frame == null
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Waiting for frames…',
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: AppColors.textSecondary),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            streamStatus,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    )
+                  : InteractiveViewer(
+                      minScale: 0.5,
+                      maxScale: 4,
+                      child: Center(
+                        child: Image.memory(
+                          frame!.imageBytes,
+                          gaplessPlayback: true,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Text(
+                            'Received a frame but could not decode the image.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+            ),
+          ),
         ),
         SafeArea(
           child: Padding(
@@ -50,13 +80,20 @@ class LiveStreamViewer extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _StatusChip(
+                      child: AppStatusChip(
                         label: connectionStatusLabel,
-                        color: Theme.of(context).colorScheme.primaryContainer,
+                        color: AppColors.primary,
+                        pulse: true,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _StatusChip(label: streamStatus),
+                    const LiveBadge(),
+                    const SizedBox(width: 8),
+                    AppStatusChip(
+                      label: streamStatus,
+                      color: AppColors.success,
+                      pulse: streamStatus.toLowerCase().contains('live'),
+                    ),
                   ],
                 ),
                 const Spacer(),
@@ -65,9 +102,10 @@ class LiveStreamViewer extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onDisconnect,
                     style: FilledButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.error,
+                      backgroundColor: AppColors.error,
+                      foregroundColor: AppColors.textPrimary,
                     ),
-                    icon: const Icon(Icons.link_off),
+                    icon: const Icon(Icons.link_off_rounded),
                     label: const Text('Disconnect'),
                   ),
                 ),
@@ -76,29 +114,6 @@ class LiveStreamViewer extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.label, this.color});
-
-  final String label;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color ?? Colors.black54,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
-        textAlign: TextAlign.center,
-      ),
     );
   }
 }
@@ -112,7 +127,7 @@ class StreamThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(18),
       child: AspectRatio(
         aspectRatio: 16 / 9,
         child: Image.memory(imageBytes, fit: BoxFit.cover),
