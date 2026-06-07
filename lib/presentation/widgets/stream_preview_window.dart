@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:peer_view_2/constants/app_colors.dart';
 import 'package:peer_view_2/features/screen_streaming/models/stream_log_entry.dart';
 
 /// Compact live preview of the host screen while streaming.
@@ -58,22 +59,41 @@ class _StreamPreviewWindowState extends State<StreamPreviewWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: _isRendererReady && widget.previewStream != null
-            ? ColoredBox(
-                color: Colors.black,
-                child: RTCVideoView(
-                  _renderer,
-                  objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderAccent),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.primaryGlow,
+            blurRadius: 18,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: _isRendererReady && widget.previewStream != null
+              ? ColoredBox(
+                  color: AppColors.background,
+                  child: RTCVideoView(
+                    _renderer,
+                    objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+                  ),
+                )
+              : const ColoredBox(
+                  color: AppColors.surfaceMuted,
+                  child: Center(
+                    child: Icon(
+                      Icons.videocam_outlined,
+                      color: AppColors.textMuted,
+                      size: 32,
+                    ),
+                  ),
                 ),
-              )
-            : const ColoredBox(
-                color: Colors.black87,
-                child: Center(child: Icon(Icons.videocam_outlined, color: Colors.white54)),
-              ),
+        ),
       ),
     );
   }
@@ -93,21 +113,25 @@ class StreamEventLog extends StatelessWidget {
     if (entries.isEmpty) {
       return Text(
         'No events yet.',
-        style: Theme.of(context).textTheme.bodySmall,
+        style: Theme.of(context).textTheme.bodyMedium,
       );
     }
+
+    final visibleEntries = entries.length > 8
+        ? entries.sublist(entries.length - 8)
+        : entries;
 
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: entries.length,
-      separatorBuilder: (_, __) => const Divider(height: 8),
+      itemCount: visibleEntries.length,
+      separatorBuilder: (_, __) => const Divider(height: 14),
       itemBuilder: (context, index) {
-        final entry = entries[entries.length - 1 - index];
+        final entry = visibleEntries[visibleEntries.length - 1 - index];
         final color = switch (entry.level) {
-          StreamLogLevel.info => Theme.of(context).colorScheme.onSurface,
-          StreamLogLevel.warning => Colors.orange,
-          StreamLogLevel.error => Theme.of(context).colorScheme.error,
+          StreamLogLevel.info => AppColors.textSecondary,
+          StreamLogLevel.warning => AppColors.warning,
+          StreamLogLevel.error => AppColors.error,
         };
 
         return Text(
