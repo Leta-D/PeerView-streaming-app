@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:peer_view_2/constants/app_colors.dart';
 
-/// Soft pulse used for live/streaming and brand indicators.
+/// Soft pulse used for live/streaming and brand indicator
 class PulseDot extends StatefulWidget {
   const PulseDot({
     super.key,
@@ -20,7 +20,8 @@ class PulseDot extends StatefulWidget {
   State<PulseDot> createState() => _PulseDotState();
 }
 
-class _PulseDotState extends State<PulseDot> with SingleTickerProviderStateMixin {
+class _PulseDotState extends State<PulseDot>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -324,9 +325,10 @@ class _FadeSlideInState extends State<FadeSlideIn>
     super.initState();
     _controller = AnimationController(vsync: this, duration: widget.duration);
     _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _slide = Tween<Offset>(begin: widget.offset, end: Offset.zero).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    _slide = Tween<Offset>(
+      begin: widget.offset,
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     Future<void>.delayed(widget.delay, () {
       if (mounted) {
@@ -352,11 +354,7 @@ class _FadeSlideInState extends State<FadeSlideIn>
 
 /// Cross-fades status text when connection/stream labels change.
 class AnimatedStatusText extends StatelessWidget {
-  const AnimatedStatusText({
-    super.key,
-    required this.text,
-    this.style,
-  });
+  const AnimatedStatusText({super.key, required this.text, this.style});
 
   final String text;
   final TextStyle? style;
@@ -379,11 +377,7 @@ class AnimatedStatusText extends StatelessWidget {
           ),
         );
       },
-      child: Text(
-        text,
-        key: ValueKey(text),
-        style: style,
-      ),
+      child: Text(text, key: ValueKey(text), style: style),
     );
   }
 }
@@ -428,34 +422,30 @@ class _ScaleOnTapState extends State<ScaleOnTap> {
 /// Lightweight page route with fade + slight scale.
 class AppFadeScalePageRoute<T> extends PageRouteBuilder<T> {
   AppFadeScalePageRoute({required Widget page})
-      : super(
-          transitionDuration: const Duration(milliseconds: 280),
-          reverseTransitionDuration: const Duration(milliseconds: 220),
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curved = CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
-            );
-            return FadeTransition(
-              opacity: curved,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.97, end: 1).animate(curved),
-                child: child,
-              ),
-            );
-          },
-        );
+    : super(
+        transitionDuration: const Duration(milliseconds: 280),
+        reverseTransitionDuration: const Duration(milliseconds: 220),
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.97, end: 1).animate(curved),
+              child: child,
+            ),
+          );
+        },
+      );
 }
 
 /// Compact LIVE badge with pulsing dot.
 class LiveBadge extends StatelessWidget {
-  const LiveBadge({
-    super.key,
-    this.label = 'LIVE',
-    this.active = true,
-  });
+  const LiveBadge({super.key, this.label = 'LIVE', this.active = true});
 
   final String label;
   final bool active;
@@ -480,10 +470,10 @@ class LiveBadge extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.6,
-                ),
+              color: color,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+            ),
           ),
         ],
       ),
