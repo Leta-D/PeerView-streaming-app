@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:peer_view_2/presentation/main_screens/role_selection_screen.dart';
+import 'package:peer_view_2/constants/app_theme.dart';
 import 'package:peer_view_2/core/di/injection.dart';
+import 'package:peer_view_2/presentation/main_screens/role_selection_screen.dart';
 
-void main() {
-  configureDependencies();
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await configureDependencies();
   runApp(const PeerViewApp());
 }
 
@@ -14,10 +16,8 @@ class PeerViewApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Peer View 2',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark,
       home: const RoleSelectionScreen(),
     );
   }
