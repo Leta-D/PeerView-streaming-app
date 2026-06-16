@@ -10,6 +10,7 @@ import 'dart:typed_data';
 /// - `ws://<host>:8080/stream`  Flutter app sends frames here
 /// - `ws://<host>:8080/viewer`  Browser viewer receives forwarded frames
 /// - `http://<host>:8080/`      Opens the built-in viewer page
+/// these endpoints and ports can be modified in the app's stream settings screen.
 Future<void> main() async {
   final viewers = <WebSocket>{};
   WebSocket? broadcaster;
