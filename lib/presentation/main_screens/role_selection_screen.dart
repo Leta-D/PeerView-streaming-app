@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:peer_view_2/core/di/injection.dart';
 import 'package:peer_view_2/features/screen_streaming/cubit/screen_streaming_cubit.dart';
-import 'package:peer_view_2/features/screen_streaming/screens/host_streaming_screen.dart';
+import 'package:peer_view_2/presentation/main_screens/host_streaming_screen.dart';
 import 'package:peer_view_2/features/screen_viewer/cubit/viewer_cubit.dart';
-import 'package:peer_view_2/features/screen_viewer/screens/viewer_screen.dart';
+import 'package:peer_view_2/presentation/main_screens/viewer_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:peer_view_2/features/screen_viewer/cubit/viewer_cubit.dart';
 import 'package:peer_view_2/features/screen_viewer/cubit/viewer_state.dart';
-import 'package:peer_view_2/features/screen_viewer/widgets/host_list_tile.dart';
-import 'package:peer_view_2/features/screen_viewer/widgets/live_stream_viewer.dart';
+import 'package:peer_view_2/presentation/widgets/host_list_tile.dart';
+import 'package:peer_view_2/presentation/widgets/live_stream_viewer.dart';
 
 /// Viewer screen for discovering hosts and watching a live LAN stream.
 class ViewerScreen extends StatefulWidget {
@@ -51,7 +51,8 @@ class _ViewerScreenState extends State<ViewerScreen> {
                 _StatusCard(state: state),
                 const SizedBox(height: 16),
                 FilledButton.icon(
-                  onPressed: state.canScan || state.phase == ViewerPhase.scanning
+                  onPressed:
+                      state.canScan || state.phase == ViewerPhase.scanning
                       ? () => context.read<ViewerCubit>().scanForHosts()
                       : null,
                   icon: state.phase == ViewerPhase.scanning
@@ -81,16 +82,20 @@ class _ViewerScreenState extends State<ViewerScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 12),
-                if (state.phase == ViewerPhase.scanning && state.discoveredHosts.isEmpty)
+                if (state.phase == ViewerPhase.scanning &&
+                    state.discoveredHosts.isEmpty)
                   const Center(child: Text('Searching the local network...'))
                 else if (state.discoveredHosts.isEmpty)
-                  const Text('No hosts found yet. Make sure the host is streaming on the same Wi‑Fi or hotspot.')
+                  const Text(
+                    'No hosts found yet. Make sure the host is streaming on the same Wi‑Fi or hotspot.',
+                  )
                 else
                   ...state.discoveredHosts.map(
                     (host) => HostListTile(
                       host: host,
                       enabled: state.phase != ViewerPhase.connecting,
-                      onConnect: () => context.read<ViewerCubit>().connectToHost(host),
+                      onConnect: () =>
+                          context.read<ViewerCubit>().connectToHost(host),
                     ),
                   ),
               ],

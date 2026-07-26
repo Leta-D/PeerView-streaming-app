@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:peer_view_2/app/screens/role_selection_screen.dart';
+import 'package:peer_view_2/presentation/main_screens/role_selection_screen.dart';
 import 'package:peer_view_2/core/di/injection.dart';
 
 void main() {

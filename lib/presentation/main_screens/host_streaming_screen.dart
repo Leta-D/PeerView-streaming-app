@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:peer_view_2/features/screen_streaming/cubit/screen_streaming_cubit.dart';
 import 'package:peer_view_2/features/screen_streaming/cubit/screen_streaming_state.dart';
-import 'package:peer_view_2/features/screen_streaming/widgets/stream_preview_window.dart';
+import 'package:peer_view_2/presentation/widgets/stream_preview_window.dart';
 
 /// Host-side screen for starting a local WebSocket stream.
 class HostStreamingScreen extends StatelessWidget {
@@ -28,14 +28,20 @@ class HostStreamingScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Status', style: Theme.of(context).textTheme.titleMedium),
+                        Text(
+                          'Status',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           _statusLabel(state.status),
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 16),
-                        _InfoRow(label: 'Host IP', value: state.hostIpAddress ?? 'Detecting...'),
+                        _InfoRow(
+                          label: 'Host IP',
+                          value: state.hostIpAddress ?? 'Detecting...',
+                        ),
                         _InfoRow(label: 'Port', value: '${state.port}'),
                         _InfoRow(
                           label: 'Connection URL',
@@ -54,7 +60,9 @@ class HostStreamingScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           Text(
                             state.lastError!,
-                            style: TextStyle(color: Theme.of(context).colorScheme.error),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           ),
                         ],
                       ],
@@ -76,10 +84,15 @@ class HostStreamingScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Live Preview', style: Theme.of(context).textTheme.titleMedium),
+                        Text(
+                          'Live Preview',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 12),
                         StreamPreviewWindow(
-                          previewStream: context.read<ScreenStreamingCubit>().previewStream,
+                          previewStream: context
+                              .read<ScreenStreamingCubit>()
+                              .previewStream,
                         ),
                       ],
                     ),
@@ -95,7 +108,9 @@ class HostStreamingScreen extends StatelessWidget {
                     Expanded(
                       child: FilledButton.icon(
                         onPressed: state.canStart
-                            ? () => context.read<ScreenStreamingCubit>().startStreaming()
+                            ? () => context
+                                  .read<ScreenStreamingCubit>()
+                                  .startStreaming()
                             : null,
                         icon: const Icon(Icons.play_arrow),
                         label: const Text('Start Streaming'),
@@ -105,7 +120,9 @@ class HostStreamingScreen extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: state.canStop
-                            ? () => context.read<ScreenStreamingCubit>().stopStreaming()
+                            ? () => context
+                                  .read<ScreenStreamingCubit>()
+                                  .stopStreaming()
                             : null,
                         icon: const Icon(Icons.stop),
                         label: const Text('Stop Streaming'),
@@ -124,7 +141,10 @@ class HostStreamingScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Recent Events', style: Theme.of(context).textTheme.titleMedium),
+                        Text(
+                          'Recent Events',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 12),
                         StreamEventLog(entries: state.recentLogs),
                       ],
@@ -176,13 +196,16 @@ class _InfoRow extends StatelessWidget {
             width: 130,
             child: Text(
               '$label:',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(
-            child: SelectableText(value, style: Theme.of(context).textTheme.bodyMedium),
+            child: SelectableText(
+              value,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
         ],
       ),
