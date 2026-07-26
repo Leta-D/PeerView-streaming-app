@@ -6,7 +6,6 @@ import 'package:peer_view_2/features/screen_streaming/screens/host_streaming_scr
 import 'package:peer_view_2/features/screen_viewer/cubit/viewer_cubit.dart';
 import 'package:peer_view_2/features/screen_viewer/screens/viewer_screen.dart';
 
-/// Entry screen for choosing host or viewer mode.
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
 
@@ -37,7 +36,8 @@ class RoleSelectionScreen extends StatelessWidget {
             _RoleCard(
               icon: Icons.cast,
               title: 'Host',
-              description: 'Capture your screen and broadcast it over a local WebSocket server.',
+              description:
+                  'Capture your screen and broadcast it over a local WebSocket server.',
               onTap: () {
                 Navigator.push(
                   context,
@@ -54,7 +54,8 @@ class RoleSelectionScreen extends StatelessWidget {
             _RoleCard(
               icon: Icons.tv,
               title: 'Client',
-              description: 'Discover nearby hosts and watch the live stream on this device.',
+              description:
+                  'Discover nearby hosts and watch the live stream on this device.',
               onTap: () {
                 Navigator.push(
                   context,
@@ -98,10 +99,7 @@ class _RoleCard extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 28,
-                child: Icon(icon, size: 28),
-              ),
+              CircleAvatar(radius: 28, child: Icon(icon, size: 28)),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
