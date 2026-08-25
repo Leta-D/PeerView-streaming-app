@@ -4,7 +4,7 @@ import 'dart:typed_data';
 /// Local WebSocket relay server for testing screen streaming from the app.
 ///
 /// Usage:
-///   dart run tool/ws_stream_server.dart
+///   dart run tool/ws_stream_server.dar
 ///
 /// Endpoints:
 /// - `ws://<host>:8080/stream`  Flutter app sends frames here
